@@ -1,0 +1,92 @@
+@startuml maie
+
+class Client
+note top 
+Specific application classes
+end note
+
+namespace maie {
+
+interface makeDetectorResnet50 {
+    + return: std::unique_ptr<ImageDetector<std::vector<float>>>
+}
+note bottom
+Global factory function
+end note
+
+interface makeDetectorYolov8 {
+    + return: std::unique_ptr<ImageDetector<std::vector<OuputYolov8>>>
+}
+note bottom
+Global factory function
+end note
+
+abstract class ImageDetector<T> {
+    + {abstract} init() : bool
+    + {abstract} detect() : bool
+}
+
+Client <-- makeDetectorResnet50
+Client <-- makeDetectorYolov8
+Client <-- ImageDetector
+
+abstract class ModelBase<T> {
+    - {abstract} __preprocess() : cv::Mat
+    - {abstract} __postprocess() : bool
+}
+
+class Resnet50 {
+    - __preprocess() : cv::Mat
+    - __postprocess() : bool
+}
+
+class Yolov8 {
+    - __preprocess() : cv::Mat
+    - __postprocess() : bool
+}
+
+ImageDetector <|-- ModelBase
+ModelBase <|-- Resnet50
+ModelBase <|-- Yolov8
+
+
+abstract class IEngine {
+    + {abstract} init() : bool
+    + {abstract} detect() : bool
+}
+
+class EngineOrt {
+    + init() : bool
+    + detect() : bool
+}
+
+class EngineTrt {
+    + init() : bool
+    + detect() : bool
+}
+
+IEngine <|-- EngineOrt
+IEngine <|-- EngineTrt
+
+
+interface makeEngineOrt {
+    + return: std::unique_ptr<IEngine>
+}
+note bottom
+Factory function
+end note
+
+interface makeEngineTrt {
+    + return: std::unique_ptr<IEngine>
+}
+note bottom
+Factory function
+end note
+
+ModelBase "1" *-- "1" IEngine
+ModelBase <-- makeEngineOrt
+ModelBase <-- makeEngineTrt
+
+}
+
+@enduml

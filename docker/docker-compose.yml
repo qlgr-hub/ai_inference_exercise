@@ -1,0 +1,29 @@
+services:
+  ai_dev:
+    image: ai_dev:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_dev
+    network_mode: bridge
+    user: "1000:0"
+    restart: always
+    tty: true
+    privileged: true
+    ports:
+      - "16222:22"
+      - "16288:8888"
+    environment:
+      TZ: 'Asia/Shanghai'
+    volumes:
+      - /home/qlgr/workspace/ai_dev:/workspace
+      - /home/qlgr/.vscode-server/:/home/qlgr/.vscode-server/
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: "all"
+              capabilities: [gpu]
